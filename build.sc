@@ -4,8 +4,6 @@ import mill.scalalib.publish._
 import mill.scalalib.scalafmt._
 import coursier.maven.MavenRepository
 import $file.dependencies.cde.build
-import $file.dependencies.`berkeley-hardfloat`.build
-import $file.dependencies.`rocket-chip`.common
 import $file.dependencies.chisel3.build
 import $file.dependencies.firrtl.build
 import $file.dependencies.treadle.build
@@ -44,26 +42,9 @@ object mychiseltest extends dependencies.chiseltest.build.chiseltestCrossModule(
 object mycde extends dependencies.cde.build.cde(v.scala) with PublishModule {
   override def millSourcePath = os.pwd /  "dependencies" / "cde" / "cde"
 }
-object myhardfloat extends dependencies.`berkeley-hardfloat`.build.hardfloat {
-  override def millSourcePath = os.pwd /  "dependencies" / "berkeley-hardfloat"
-  override def scalaVersion = v.scala
-  def chisel3Module: Option[PublishModule] = Some(mychisel3)
-  override def scalacPluginClasspath = T { super.scalacPluginClasspath() ++ Agg(mychisel3.plugin.jar()) }
-  override def scalacOptions = T { Seq("-Xsource:2.11", s"-Xplugin:${mychisel3.plugin.jar().path}", "-P:chiselplugin:genBundleElements") }
-}
-object myrocketchip extends dependencies.`rocket-chip`.common.CommonRocketChip {
-  def chisel3Module: Option[PublishModule] = Some(mychisel3)
-  def hardfloatModule: PublishModule = myhardfloat
-  def configModule: PublishModule = mycde
-  override def scalaVersion = v.scala
-  override def millSourcePath = os.pwd /  "dependencies" / "rocket-chip"
-  override def scalacPluginClasspath = T { super.scalacPluginClasspath() ++ Agg(mychisel3.plugin.jar()) }
-  override def scalacOptions = T { Seq("-Xsource:2.11", s"-Xplugin:${mychisel3.plugin.jar().path}", "-P:chiselplugin:genBundleElements") }
-}
 
 object tilelink extends common.TileLinkModule with ScalafmtModule { m =>
   def scalaVersion = T { v.scala }
-  def rocketchipModule = myrocketchip
   def chisel3Module = Some(mychisel3)
   def chisel3PluginJar = T { Some(mychisel3.plugin.jar()) }
 }
@@ -71,10 +52,4 @@ object tilelink extends common.TileLinkModule with ScalafmtModule { m =>
 object busip extends common.BusIPModule { m =>
   def scalaVersion = T { v.scala }
   def tileLinkModule = tilelink
-}
-
-object diplomatic extends common.DiplomaticModule { m =>
-  def scalaVersion = T { v.scala }
-  def busIPModule = busip
-  def rocketchipModule = myrocketchip
 }
