@@ -76,7 +76,7 @@ class TLArbiter(val parameter: TLArbiterParameter)
     val valids = sources.map(_.valid)
 
     val readys = VecInit(policyImpl(valids.size, Cat(valids.reverse).asUInt, latch).asBools)
-    val winner = VecInit((readys.zip(valids)).map { case (r, v) => r && v })
+    val winner = VecInit(readys.zip(valids).map { case (r, v) => r && v })
 
     // confirm policy make sense
     require(readys.size == valids.size)
@@ -89,7 +89,7 @@ class TLArbiter(val parameter: TLArbiterParameter)
 
     // Track remaining beats
     val maskedBeats =
-      (winner.zip(beatsIn)).map { case (w, b) => Mux(w, b, 0.U) }
+      winner.zip(beatsIn).map { case (w, b) => Mux(w, b, 0.U) }
     val initBeats   = maskedBeats.reduce(_ | _) // no winner => 0 beats
     beatsLeft := Mux(latch, initBeats, beatsLeft - sink.fire)
 

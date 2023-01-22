@@ -5,8 +5,6 @@ import chisel3.util._
 import chisel3.util.experimental.BitSet
 import chisel3.util.experimental.decode.decoder
 
-import upickle.default.{macroRW, ReadWriter => RW}
-
 object TLCrossBar {
   private def fanout(
     input:  DecoupledIO[TLChannel],
@@ -167,6 +165,7 @@ class TLCrossBar(val parameter: TLCrossBarParameter)
           case (port, true) => port.intersect(BitPat.dontCare(maxBits))
           case (_, false)   => BitSet.empty
         }
+        //noinspection RedundantDefaultArgument
         (addressable, (addr: UInt) => decoder.bitset(addr, maskedPorts, errorBit = false).asBools)
       }
     }.toMap

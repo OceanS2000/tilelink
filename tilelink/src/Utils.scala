@@ -26,6 +26,7 @@ package object utils {
   def leftOR(x: UInt, width: Integer, cap: Integer = 999999): UInt = {
     val stop = min(width, cap)
 
+    @tailrec
     def helper(s: Int, x: UInt): UInt =
       if (s >= stop) x else helper(s + s, x | (x << s) (width - 1, 0))
 
@@ -38,6 +39,7 @@ package object utils {
   def rightOR(x: UInt, width: Integer, cap: Integer = 999999): UInt = {
     val stop = min(width, cap)
 
+    @tailrec
     def helper(s: Int, x: UInt): UInt =
       if (s >= stop) x else helper(s + s, x | (x >> s) (width - 1, 0))
 
