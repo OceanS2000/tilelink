@@ -5,6 +5,8 @@ import chisel3.util._
 import chisel3.util.experimental.BitSet
 import chisel3.util.experimental.decode.decoder
 
+import upickle.default.{macroRW, ReadWriter => RW}
+
 object TLCrossBar {
   private def fanout(
     input:  DecoupledIO[TLChannel],

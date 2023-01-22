@@ -4,15 +4,17 @@ import chisel3.util._
 import chisel3._
 import utils._
 
+import upickle.default.{macroRW, ReadWriter => RW}
+
 sealed trait TLArbiterPolicy
-
-object TLArbiterPolicy {
-  case object Priority   extends TLArbiterPolicy
-  case object RoundRobin extends TLArbiterPolicy
-}
-
-object TLArbiterParameter {
-  // implicit val rw = upickle.default.macroRW[TLArbiterParameter]
+object TLArbiterPolicy    {
+  case object Priority   extends TLArbiterPolicy {
+    implicit val rw: RW[this.type] = macroRW
+  }
+  case object RoundRobin extends TLArbiterPolicy {
+    implicit val rw: RW[this.type] = macroRW
+  }
+  implicit val rw: RW[TLArbiterPolicy] = RW.merge(Priority.rw, RoundRobin.rw)
 }
 
 case class TLArbiterParameter(
@@ -20,6 +22,9 @@ case class TLArbiterParameter(
   inputLinkParameters: Seq[TLChannelParameter],
   outputLinkParameter: TLChannelParameter)
     extends chisel3.experimental.SerializableModuleParameter
+object TLArbiterParameter {
+  implicit val rw: RW[TLArbiterParameter] = macroRW
+}
 
 class TLArbiter(val parameter: TLArbiterParameter)
     extends Module

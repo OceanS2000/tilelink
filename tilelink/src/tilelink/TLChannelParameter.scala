@@ -2,8 +2,18 @@ package tilelink
 
 import chisel3.util.isPow2
 
-object TLChannelParameter {
-  // implicit val rw = upickle.default.macroRW[TLChannelParameter]
+import upickle.default.{macroRW, ReadWriter => RW}
+
+sealed trait TLChannelParameter
+
+object TLChannelParameter        {
+  implicit val rw: RW[TLChannelParameter] = RW.merge(
+    TileLinkChannelAParameter.rw,
+    TileLinkChannelBParameter.rw,
+    TileLinkChannelCParameter.rw,
+    TileLinkChannelDParameter.rw,
+    TileLinkChannelEParameter.rw
+  )
 
   def bundle(p: TLChannelParameter): TLChannel = {
     p match {
@@ -15,8 +25,6 @@ object TLChannelParameter {
     }
   }
 }
-
-sealed trait TLChannelParameter
 
 case class TileLinkChannelAParameter(
   addressWidth: Int,
@@ -33,6 +41,9 @@ case class TileLinkChannelAParameter(
     isPow2(dataWidth / 8),
     "Width of data field in bytes must be power of 2"
   )
+}
+object TileLinkChannelAParameter {
+  implicit val rw: RW[TileLinkChannelAParameter] = macroRW
 }
 
 case class TileLinkChannelBParameter(
@@ -51,6 +62,9 @@ case class TileLinkChannelBParameter(
     "Width of data field in bytes must be power of 2"
   )
 }
+object TileLinkChannelBParameter {
+  implicit val rw: RW[TileLinkChannelBParameter] = macroRW
+}
 
 case class TileLinkChannelCParameter(
   addressWidth: Int,
@@ -67,6 +81,9 @@ case class TileLinkChannelCParameter(
     isPow2(dataWidth / 8),
     "Width of data field in bytes must be power of 2"
   )
+}
+object TileLinkChannelCParameter {
+  implicit val rw: RW[TileLinkChannelCParameter] = macroRW
 }
 
 case class TileLinkChannelDParameter(
@@ -85,7 +102,13 @@ case class TileLinkChannelDParameter(
     "Width of data field in bytes must be power of 2"
   )
 }
+object TileLinkChannelDParameter {
+  implicit val rw: RW[TileLinkChannelDParameter] = macroRW
+}
 
 case class TileLinkChannelEParameter(sinkWidth: Int) extends TLChannelParameter {
   require(sinkWidth > 0)
+}
+object TileLinkChannelEParameter {
+  implicit val rw: RW[TileLinkChannelEParameter] = macroRW
 }

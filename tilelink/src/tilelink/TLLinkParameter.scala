@@ -2,6 +2,8 @@ package tilelink
 
 import chisel3.util.isPow2
 
+import upickle.default.{macroRW, ReadWriter => RW}
+
 /** Parameter of a TileLink link bundle
   *
   * All width values are specified in bits
@@ -67,4 +69,6 @@ object TLLinkParameter {
       sizeWidth = x.map(_.sizeWidth).max,
       hasBCEChannels = x.map(_.hasBCEChannels).fold(false)(_ || _)
     )
+
+  implicit val rw: RW[TLLinkParameter] = macroRW
 }

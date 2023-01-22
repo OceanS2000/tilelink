@@ -2,6 +2,9 @@ import chisel3._
 import chisel3.util._
 
 import scala.math.min
+import upickle.default.{readwriter, ReadWriter => RW}
+
+import scala.annotation.tailrec
 
 package object utils {
   def OH1ToOH(x: UInt): UInt =
@@ -40,4 +43,10 @@ package object utils {
 
     helper(1, x)(width - 1, 0)
   }
+
+  // Inject serializers for chisel3 BitSet and BitPat
+  implicit val bitPatSerializer: RW[chisel3.util.BitPat]              =
+    readwriter[String].bimap(_.rawString, chisel3.util.BitPat(_))
+  implicit val bitSetSerializer: RW[chisel3.util.experimental.BitSet] =
+    readwriter[Seq[chisel3.util.BitPat]].bimap(_.terms.toSeq, chisel3.util.experimental.BitSet(_: _*))
 }

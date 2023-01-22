@@ -3,13 +3,7 @@ package tilelink
 import chisel3._
 import chisel3.util._
 
-object TLIdRange {
-  def overlaps(s: Seq[TLIdRange]) = if (s.isEmpty) None
-  else {
-    val ranges = s.sorted
-    (ranges.tail.zip(ranges.init)).find { case (a, b) => a.overlaps(b) }
-  }
-}
+import upickle.default.{macroRW, ReadWriter => RW}
 
 // A non-empty half-open range; [start, end)
 case class TLIdRange(start: Int, end: Int) extends Ordered[TLIdRange] {
@@ -49,4 +43,14 @@ case class TLIdRange(start: Int, end: Int) extends Ordered[TLIdRange] {
   def isEmpty       = end == start
 
   def range = start until end
+}
+object TLIdRange {
+  def overlaps(s: Seq[TLIdRange]) =
+    if (s.isEmpty) None
+    else {
+      val ranges = s.sorted
+      ranges.tail.zip(ranges.init).find { case (a, b) => a.overlaps(b) }
+    }
+
+  implicit val rw: RW[TLIdRange] = macroRW
 }

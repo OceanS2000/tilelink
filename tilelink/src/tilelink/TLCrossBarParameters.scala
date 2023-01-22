@@ -2,37 +2,28 @@ package tilelink
 
 import chisel3._
 import chisel3.util._
-import chisel3.util.experimental.BitSet
-import chisel3.util.experimental.decode.decoder
+
+import upickle.default.{macroRW, readwriter, ReadWriter => RW}
 
 case class TLCrossBarMasterLinkParameter(
   linkParameter: TLLinkParameter,
   adVisibility:  chisel3.util.experimental.BitSet,
   bceVisibility: chisel3.util.experimental.BitSet,
   srcIdRange:    TLIdRange)
+object TLCrossBarMasterLinkParameter {
+  import utils.{bitPatSerializer, bitSetSerializer}
+  implicit val rw: RW[TLCrossBarMasterLinkParameter] = macroRW
+}
+
 case class TLCrossBarSlaveLinkParameter(
   linkParameter: TLLinkParameter,
   adVisibility:  chisel3.util.experimental.BitSet,
   bceVisibility: chisel3.util.experimental.BitSet,
   sinkIdRange:   TLIdRange,
   addressRange:  chisel3.util.experimental.BitSet)
-
-object TLCrossBarParameter {
-  // implicit val rw = upickle.default.macroRW[TLCrossBarParameter]
-  private def assignIdRange(sizes: Seq[Int]) = {
-    val pow2Sizes = sizes.map { z => if (z == 0) 0 else 1 << log2Ceil(z) }
-    val tuples    = pow2Sizes.zipWithIndex.sortBy(
-      _._1
-    ) // record old index, then sort by increasing size
-    val starts =
-      tuples
-        .scanRight(0)(_._1 + _)
-        .tail // suffix-sum of the sizes = the start positions
-    val ranges = (tuples.zip(starts)).map { case ((sz, i), st) =>
-      (if (sz == 0) TLIdRange(0, 0) else TLIdRange(st, st + sz), i)
-    }
-    ranges.sortBy(_._2).map(_._1) // Restore original order
-  }
+object TLCrossBarSlaveLinkParameter  {
+  import utils.{bitPatSerializer, bitSetSerializer}
+  implicit val rw: RW[TLCrossBarSlaveLinkParameter] = macroRW
 }
 
 case class TLCrossBarParameter(
@@ -65,4 +56,23 @@ case class TLCrossBarParameter(
   private[tilelink] def commonLinkParameter = TLLinkParameter.union(
     masters.map(_.linkParameter) ++ slaves.map(_.linkParameter): _*
   )
+}
+
+object TLCrossBarParameter {
+  private def assignIdRange(sizes: Seq[Int]) = {
+    val pow2Sizes = sizes.map { z => if (z == 0) 0 else 1 << log2Ceil(z) }
+    val tuples    = pow2Sizes.zipWithIndex.sortBy(
+      _._1
+    ) // record old index, then sort by increasing size
+    val starts =
+      tuples
+        .scanRight(0)(_._1 + _)
+        .tail // suffix-sum of the sizes = the start positions
+    val ranges = tuples.zip(starts).map { case ((sz, i), st) =>
+      (if (sz == 0) TLIdRange(0, 0) else TLIdRange(st, st + sz), i)
+    }
+    ranges.sortBy(_._2).map(_._1) // Restore original order
+  }
+
+  implicit val rw: RW[TLCrossBarParameter] = macroRW
 }
